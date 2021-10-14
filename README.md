@@ -24,6 +24,3 @@ import { Client } from "https://deno.land/x/pg/mod.ts";
 You can check
 [examples](https://github.com/Satont/grammy-psql-storage/tree/main/examples)
 folder
-
-```
-```
