@@ -16,7 +16,7 @@ Deno
 
 ```ts
 import { PsqlAdapter } from "https://deno.land/x/grammy_psql_storage/mod.ts";
-import { Client } from "https://deno.land/x/pg/mod.ts";
+import { Client } from "https://deno.land/x/postgre/mod.ts";
 ```
 
 ## Usage
