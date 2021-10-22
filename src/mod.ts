@@ -1,36 +1,47 @@
-import { Client, StorageAdapter } from './deps.deno.ts'
+import { Client, StorageAdapter, buildQueryRunner } from './deps.deno.ts'
 
 interface AdapterConstructor {
   client: Client;
   tableName: string,
+  query: (query: string, params?: string[] | undefined) => Promise<any>
 }
 
-const defaultOpts: Omit<AdapterConstructor, 'client'> = {
-  tableName: 'sessions'
+interface DbOject {
+  key: string,
+  value: string
 }
 
 export class PsqlAdapter<T> implements StorageAdapter<T> {
-  private client: Client
   private tableName: string
+  private query = (query: string, params?: string[] | undefined): Promise<unknown> | unknown => null
 
   /**
     * @private
   */
   private constructor(opts: AdapterConstructor) {
-    this.client = opts.client
     this.tableName = opts.tableName
+    this.query = opts.query
   }
 
-  static async create(opts = defaultOpts as AdapterConstructor) {
-    const query = `CREATE TABLE IF NOT EXISTS "${opts.tableName}" ("id" SERIAL NOT NULL, "key" VARCHAR NOT NULL, "value" TEXT)`
-    await opts.client.query(query)
+  static async create(opts = { tableName: 'sessions' } as Omit<AdapterConstructor, 'query'>) {
+    const queryString = `
+      CREATE TABLE IF NOT EXISTS "$1" (
+        "key" VARCHAR NOT NULL,
+        "value" TEXT
+      )`.replace(/  +/g, '').replace('\n', '')
+    const query = buildQueryRunner(opts.client)
+    await query(queryString, [opts.tableName])
+    await query(`CREATE UNIQUE INDEX "IDX_$1" ON "$1" ("key")`, [opts.tableName])
 
-    return new PsqlAdapter(opts)
+    return new PsqlAdapter({
+      ...opts,
+      query,
+    })
   }
 
   private async findSession(key: string) {
-    const results = await this.client.query(`select * from "${this.tableName}" where key = '${key}'`)
-    const session = results.rows[0]
+    const results = await this.query(`select * from "$1" where key = $2`, [this.tableName, key]) as DbOject[]
+    const session = results[0]
 
     return session
   }
@@ -46,14 +57,15 @@ export class PsqlAdapter<T> implements StorageAdapter<T> {
   }
 
   async write(key: string, value: T) {
-    if (await this.findSession(key)) {
-      await this.client.query(`update "${this.tableName}" SET value = '${JSON.stringify(value)}' where key = '${key}'`)
-    } else {
-      await this.client.query(`insert into "${this.tableName}" (key, value) values ('${key}', '${JSON.stringify(value)}')`)
-    }
+    await this.query(`
+      INSERT INTO "$1" (key, value)
+      values ($2, $3)
+      ON CONFLICT (key) DO UPDATE SET value = $3`.replace(/  +/g, '').replace('\n', ''), 
+      [this.tableName, key, JSON.stringify(value)]
+    )
   }
 
   async delete(key: string) {
-    await this.client.query(`delete from ${this.tableName} where key = '${key}'`)
+    await this.query(`delete from $1 where key = $2`, [this.tableName, key])
   }
 }

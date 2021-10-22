@@ -1,5 +1,5 @@
 import { newDb } from 'pg-mem';
-import { PsqlAdapter } from '../src/mod'
+import { PsqlAdapter } from '../dist/mod'
 import { Bot, Context, SessionFlavor, session } from 'grammy'
 
 interface SessionData {
