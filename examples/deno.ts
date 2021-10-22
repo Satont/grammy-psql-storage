@@ -1,6 +1,6 @@
 import { Bot, Context, session, SessionFlavor } from "https://deno.land/x/grammy@v1.3.3/mod.ts";
 import { PsqlAdapter } from 'https://deno.land/x/grammy_psql_storage/mod.ts';
-import { Client } from "https://deno.land/x/pg/mod.ts";
+import { Client } from "https://deno.land/x/postgres@v0.13.0/mod.ts";
 
 interface SessionData {
   counter: number;
@@ -9,11 +9,10 @@ type MyContext = Context & SessionFlavor<SessionData>;
 
 async function bootstrap() {
   const client = new Client({
-    user: 'postgres',
-    hostname: '127.0.0.1',
-    database: 'test',
-    password: '123456',
-    port: 5432
+    user: "user",
+    database: "test",
+    hostname: "localhost",
+    port: 5432,
   });
   
   await client.connect();
