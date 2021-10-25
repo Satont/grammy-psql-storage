@@ -6,6 +6,11 @@ interface SessionData {
   pizzaCount: number;
 }
 
+interface StringSessionFlavor {
+  get session(): string;
+  set session(session: string | null | undefined);
+}
+
 test('Bot should be created', () => {
   expect(createBot()).not.toBeFalsy();
 });
@@ -17,9 +22,7 @@ describe('Pizza counter test', () => {
     const client = new (newDb().adapters.createPg().Client)
 
     bot.use(session({
-      initial() {
-        return { pizzaCount: 0 };
-      },
+      initial:() => ({ pizzaCount: 0 }),
       storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
     }));
 
@@ -51,6 +54,39 @@ describe('Pizza counter test', () => {
     await bot.handleUpdate(createMessage(bot, 'second').update);
   });
 });
+
+describe('Simple string test', () => {
+  test('Should be changed', async () => {
+    const client = new (newDb().adapters.createPg().Client)
+    const bot = new Bot<Context & StringSessionFlavor>('fake-token', { 
+      botInfo: {
+        id: 42,
+        first_name: 'Test Bot',
+        is_bot: true,
+        username: 'bot',
+        can_join_groups: true,
+        can_read_all_group_messages: true,
+        supports_inline_queries: false,
+      },
+    });
+
+    bot.use(session({
+      initial: () => 'test',
+      storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
+    }));
+
+    bot.hears('first', async (ctx) => {
+      ctx.session = `${ctx.session} edited`;
+    });
+    
+    bot.hears('second', async (ctx) => {
+      expect(ctx.session).toEqual('test edited');
+    });
+    
+    await bot.handleUpdate(createMessage(bot, 'first').update);
+    await bot.handleUpdate(createMessage(bot, 'second').update);
+  })
+})
 
 function createBot<T>(token = 'fake-token') {
   return new Bot<Context & SessionFlavor<T>>(token, { 

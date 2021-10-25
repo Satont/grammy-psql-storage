@@ -7,6 +7,11 @@ interface SessionData {
   pizzaCount: number;
 }
 
+interface StringSessionFlavor {
+  get session(): string;
+  set session(session: string | null | undefined);
+}
+
 Deno.test('Bot should be created', () => {
   expect(createBot()).not.toBeFalsy()
 })
@@ -38,8 +43,17 @@ Deno.test('Pizza counter tests', async () => {
 Deno.test('Simple string tests', async () => {
   const client = new (newDb().adapters.createPg().Client)
 
-  type SimpleString = string
-  const bot = createBot<SimpleString>();
+  const bot = new Bot<Context & StringSessionFlavor>('fake-token', { 
+    botInfo: {
+      id: 42,
+      first_name: 'Test Bot',
+      is_bot: true,
+      username: 'bot',
+      can_join_groups: true,
+      can_read_all_group_messages: true,
+      supports_inline_queries: false,
+    },
+  });
 
   bot.use(session({
     initial() {
