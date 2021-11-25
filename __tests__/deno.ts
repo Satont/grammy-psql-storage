@@ -29,7 +29,7 @@ Deno.test('Pizza counter tests', async () => {
   bot.use(
     session({
       initial: () => ({ pizzaCount: 0 }),
-      storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
+      storage: await PsqlAdapter.create({ tableName: 'pizzacounter', client }),
     })
   );
 
@@ -45,7 +45,6 @@ Deno.test('Pizza counter tests', async () => {
   await bot.handleUpdate(createMessage(bot, 'first').update);
   await bot.handleUpdate(createMessage(bot, 'second').update);
 
-  await client.queryObject('TRUNCATE sessions');
   await client.end();
 });
 
@@ -75,7 +74,7 @@ Deno.test('Simple string tests', async () => {
       initial() {
         return 'test';
       },
-      storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
+      storage: await PsqlAdapter.create({ tableName: 'simplestring', client }),
     })
   );
 
@@ -90,7 +89,6 @@ Deno.test('Simple string tests', async () => {
   await bot.handleUpdate(createMessage(bot, 'first').update);
   await bot.handleUpdate(createMessage(bot, 'second').update);
 
-  await client.queryObject('TRUNCATE sessions');
   await client.end();
 });
 
