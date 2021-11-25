@@ -4,7 +4,10 @@ export type { Client } from 'https://deno.land/x/postgres@v0.14.2/mod.ts';
 
 export function buildQueryRunner(client: Client) {
   return async (query: string, params?: string[]) => {
-    const { rows } = await client.queryObject(query, { params });
+    const { rows } = await client.queryArray({
+      text: query,
+      args: params,
+    });
 
     return rows;
   };
