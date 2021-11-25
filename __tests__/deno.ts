@@ -19,6 +19,7 @@ Deno.test('Bot should be created', () => {
 Deno.test('Pizza counter tests', async () => {
   const client = new Client({
     user: 'postgres',
+    password: 'postgres',
     database: 'postgres',
     hostname: 'localhost',
     port: 5432,
@@ -51,6 +52,7 @@ Deno.test('Pizza counter tests', async () => {
 Deno.test('Simple string tests', async () => {
   const client = new Client({
     user: 'postgres',
+    password: 'postgres',
     database: 'postgres',
     hostname: 'localhost',
     port: 5432,
