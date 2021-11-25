@@ -31,7 +31,7 @@ export class PsqlAdapter<T> implements StorageAdapter<T> {
       )`;
     const query = buildQueryRunner(opts.client);
     await query(queryString);
-    await query(`CREATE UNIQUE INDEX "IDX_$1" ON "$1" ("key")`, [opts.tableName]);
+    await query(`CREATE UNIQUE INDEX IF NOT EXISTS IDX_${opts.tableName} ON "${opts.tableName}" ("key")`);
 
     return new PsqlAdapter({
       ...opts,
@@ -61,7 +61,7 @@ export class PsqlAdapter<T> implements StorageAdapter<T> {
       `
       INSERT INTO "${this.tableName}" (key, value)
       values ($1, $2)
-      ON CONFLICT (key) DO UPDATE SET value = $3`,
+      ON CONFLICT (key) DO UPDATE SET value = $2`,
       [key, JSON.stringify(value)]
     );
   }
