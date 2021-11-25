@@ -1,7 +1,7 @@
-import { newDb } from 'https://deno.land/x/pg_mem/mod.ts';
-import { Bot, Context, SessionFlavor, session } from 'https://deno.land/x/grammy/mod.ts';
-import { expect } from 'https://deno.land/x/expect/mod.ts'
+import { Bot, Context, SessionFlavor, session } from 'https://deno.land/x/grammy@v1.4.2/mod.ts';
+import { expect } from 'https://deno.land/x/expect/mod.ts';
 import { PsqlAdapter } from '../src/mod.ts';
+import { Client } from 'https://deno.land/x/postgres@v0.14.2/mod.ts';
 
 interface SessionData {
   pizzaCount: number;
@@ -13,37 +13,50 @@ interface StringSessionFlavor {
 }
 
 Deno.test('Bot should be created', () => {
-  expect(createBot()).not.toBeFalsy()
-})
+  expect(createBot()).not.toBeFalsy();
+});
 
 Deno.test('Pizza counter tests', async () => {
-  const client = new (newDb().adapters.createPg().Client)
+  const client = new Client({
+    user: 'postgres',
+    database: 'postgres',
+    hostname: 'localhost',
+    port: 5432,
+  });
   const bot = createBot<SessionData>();
 
-  bot.use(session({
-    initial: () => ({ pizzaCount: 0 }),
-    storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
-  }));
+  bot.use(
+    session({
+      initial: () => ({ pizzaCount: 0 }),
+      storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
+    })
+  );
 
   bot.hears('first', (ctx) => {
-    expect(ctx.session.pizzaCount).toEqual(0)
+    expect(ctx.session.pizzaCount).toEqual(0);
     ctx.session.pizzaCount = Number(ctx.session.pizzaCount) + 1;
   });
-  
+
   bot.hears('second', (ctx) => {
     expect(ctx.session.pizzaCount).toEqual(1);
   });
-  
+
   await bot.handleUpdate(createMessage(bot, 'first').update);
   await bot.handleUpdate(createMessage(bot, 'second').update);
 
-  client.close()
-})
+  await client.queryObject('TRUNCATE sessions');
+  await client.end();
+});
 
 Deno.test('Simple string tests', async () => {
-  const client = new (newDb().adapters.createPg().Client)
+  const client = new Client({
+    user: 'postgres',
+    database: 'postgres',
+    hostname: 'localhost',
+    port: 5432,
+  });
 
-  const bot = new Bot<Context & StringSessionFlavor>('fake-token', { 
+  const bot = new Bot<Context & StringSessionFlavor>('fake-token', {
     botInfo: {
       id: 42,
       first_name: 'Test Bot',
@@ -55,29 +68,32 @@ Deno.test('Simple string tests', async () => {
     },
   });
 
-  bot.use(session({
-    initial() {
-      return 'test';
-    },
-    storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
-  }));
+  bot.use(
+    session({
+      initial() {
+        return 'test';
+      },
+      storage: await PsqlAdapter.create({ tableName: 'sessions', client }),
+    })
+  );
 
   bot.hears('first', async (ctx) => {
     ctx.session = `${ctx.session} edited`;
   });
-  
+
   bot.hears('second', async (ctx) => {
     expect(ctx.session).toEqual('test edited');
   });
-  
+
   await bot.handleUpdate(createMessage(bot, 'first').update);
   await bot.handleUpdate(createMessage(bot, 'second').update);
 
-  client.close()
-})
+  await client.queryObject('TRUNCATE sessions');
+  await client.end();
+});
 
 function createBot<T>(token = 'fake-token') {
-  return new Bot<Context & SessionFlavor<T>>(token, { 
+  return new Bot<Context & SessionFlavor<T>>(token, {
     botInfo: {
       id: 42,
       first_name: 'Test Bot',
@@ -93,21 +109,22 @@ function createBot<T>(token = 'fake-token') {
 function createMessage(bot: Bot<any>, text = 'Test Text') {
   const createRandomNumber = () => Math.floor(Math.random() * (123456789 - 1) + 1);
 
-  const ctx = new Context({ 
-    update_id: createRandomNumber(), 
-    message: { 
-      text,
-      message_id: createRandomNumber(),
-      chat: { 
-        id: 1,
-        type: 'private',
-        first_name: 'Test User',
+  const ctx = new Context(
+    {
+      update_id: createRandomNumber(),
+      message: {
+        text,
+        message_id: createRandomNumber(),
+        chat: {
+          id: 1,
+          type: 'private',
+          first_name: 'Test User',
+        },
+        date: Date.now(),
       },
-      date: Date.now(),
     },
-  }, 
-  bot.api, 
-  bot.botInfo
+    bot.api,
+    bot.botInfo
   );
 
   return ctx;
