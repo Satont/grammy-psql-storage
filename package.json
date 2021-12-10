@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Satont/grammy-psql-storage#readme",
   "devDependencies": {
+    "@satont/grammy-storage-utils": "^1.0.1",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.10",
     "@types/pg": "^8.6.1",
