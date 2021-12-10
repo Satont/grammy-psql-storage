@@ -6,7 +6,7 @@ import * as utils from '@satont/grammy-storage-utils'
 describe('Pizza counter test', () => {
   test('Pizza counter should be equals 0 on initial', async () => {
     const bot = utils.createBot()
-    const ctx = createMessage(bot);
+    const ctx = utils.createMessage(bot);
     const client = new (newDb().adapters.createPg().Client)
 
     bot.use(session({
