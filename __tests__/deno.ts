@@ -1,8 +1,8 @@
-import { session } from 'https://deno.land/x/grammy@v1.5.2/mod.ts';
+import { session } from 'https://deno.land/x/grammy@v1.5.3/mod.ts';
 import { expect } from 'https://deno.land/x/expect/mod.ts';
 import { PsqlAdapter } from '../src/mod.ts';
 import { Client } from 'https://deno.land/x/postgres@v0.14.2/mod.ts';
-import * as utils from 'https://deno.land/x/grammy_storage_utils@1.0.1/mod.ts'
+import * as utils from 'https://deno.land/x/grammy_storage_utils@1.0.2/mod.ts'
 
 Deno.test('Pizza counter tests', async () => {
   const client = new Client({
