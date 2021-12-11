@@ -8,6 +8,21 @@ on:
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v2
       - uses: denoland/setup-deno@v1
@@ -40,7 +55,7 @@ jobs:
         id: test
         continue-on-error: true
         run: |
-          deno test __tests__/deno.ts --allow-write --allow-read --allow-net --unstable
+          deno test __tests__/deno.ts --unstable --no-check --allow-net
       - name: Set commit status with outcome
         uses: Sibz/github-status-action@v1
         with: 
