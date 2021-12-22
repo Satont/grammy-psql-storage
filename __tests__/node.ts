@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest'
 import { newDb } from 'pg-mem';
 import { PsqlAdapter } from '../dist/mod'
 import { session } from 'grammy'

@@ -11,7 +11,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "npx jest __tests__/node.ts",
+    "test": "vitest",
     "prebuild": "rimraf dist",
     "build": "deno2node tsconfig.build.json"
   },
@@ -27,17 +27,15 @@
   "homepage": "https://github.com/Satont/grammy-psql-storage#readme",
   "devDependencies": {
     "@satont/grammy-storage-utils": "^1.0.3",
-    "@types/jest": "^27.0.3",
     "@types/node": "^16.11.13",
     "@types/pg": "^8.6.2",
     "deno2node": "^1.1.0",
     "grammy": "^1.5.4",
-    "jest": "^27.4.5",
     "pg": "^8.7.1",
     "pg-mem": "^2.1.9",
     "rimraf": "^3.0.2",
-    "ts-jest": "^27.1.2",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "vite": "^2.7.6",
+    "vitest": "^0.0.107"
   }
 }
