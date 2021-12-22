@@ -28,7 +28,7 @@
   "devDependencies": {
     "@satont/grammy-storage-utils": "^1.0.3",
     "@types/node": "^16.11.13",
-    "@types/pg": "^8.6.2",
+    "@types/pg": "^8.6.3",
     "deno2node": "^1.1.0",
     "grammy": "^1.5.4",
     "pg": "^8.7.1",
