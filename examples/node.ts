@@ -10,7 +10,7 @@ type MyContext = Context & SessionFlavor<SessionData>;
 async function bootstrap() {
   const client = new Client({
     user: 'postgres',
-    hostname: '127.0.0.1',
+    host: '127.0.0.1',
     database: 'test',
     password: '123456',
     port: 5432

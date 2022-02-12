@@ -11,7 +11,7 @@ async function bootstrap() {
   const client = new Client({
     user: 'user',
     database: 'test',
-    hostname: 'localhost',
+    host: 'localhost',
     port: 5432,
   });
 
